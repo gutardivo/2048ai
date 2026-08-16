@@ -5,18 +5,20 @@ import json
 import matplotlib.pyplot as plt
 
 
-def play_game(genome):
+def play_game(genome, win_target=1024):
     """
     Faz o agente jogar uma partida.
 
     Retorna:
         board final
         score final
+        won: True se atingiu win_target
     """
 
     board = game.reset_game()
 
     total_score = 0
+    won = False
 
     while not game.is_game_over(board):
 
@@ -39,7 +41,12 @@ def play_game(genome):
 
             game.add_new_tile(board)
 
-    return board, total_score
+            # Verifica se venceu (atingiu win_target)
+            max_tile = max(max(row) for row in board)
+            if max_tile >= win_target and not won:
+                won = True
+
+    return board, total_score, won
 
 
 def save_genome(
@@ -69,7 +76,7 @@ def load_genome(
         return json.load(file)
 
 
-def train():
+def train(win_target=1024):
     """
     Treina o algoritmo genético.
     """
@@ -78,7 +85,8 @@ def train():
         genetic.evolve(
             population_size=30,
             generations=20,
-            survivors_count=6
+            survivors_count=6,
+            win_target=win_target
         )
     )
 
@@ -132,7 +140,7 @@ def plot_evolution(history):
     plt.show()
 
 
-def test_agent(genome, games=50):
+def test_agent(genome, games=50, win_target=1024):
     """
     Testa o genome em várias partidas.
 
@@ -142,11 +150,13 @@ def test_agent(genome, games=50):
 
     scores = []
     max_tiles = []
+    wins = 0
 
     for _ in range(games):
 
-        board, score = play_game(
-            genome
+        board, score, won = play_game(
+            genome,
+            win_target
         )
 
         scores.append(score)
@@ -157,6 +167,9 @@ def test_agent(genome, games=50):
                 for row in board
             )
         )
+
+        if won:
+            wins += 1
 
     print("\n==============================")
     print("TEST")
@@ -182,8 +195,8 @@ def test_agent(genome, games=50):
     )
 
     print(
-        f"Won the game: "
-        f"{max(max_tiles) >= 2048}"
+        f"Wins (target {win_target}): {wins}/{games} "
+        f"({wins/games*100:.1f}%)"
     )
 
 

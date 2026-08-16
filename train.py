@@ -62,12 +62,15 @@ def main():
 
     genome = load_genome()
 
+    win_target = 1024
+
     # Treina
     best_genome, fitness, history = genetic.evolve(
         population_size=30,
         generations=20,
         survivors_count=6,
-        initial_genome=genome
+        initial_genome=genome,
+        win_target=win_target
     )
 
     print("\n==============================")

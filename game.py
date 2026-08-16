@@ -201,7 +201,11 @@ def add_new_tile(board):
 
     90% -> 2
     10% -> 4
+
+    Cria uma cópia do board para não modificar o original.
     """
+
+    board = [row[:] for row in board]
 
     empty_cells = []
 

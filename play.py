@@ -14,11 +14,12 @@ def load_genome():
         return json.load(file)
 
 
-def play_game(genome):
+def play_game(genome, win_target=1024):
 
     board = game.reset_game()
 
     score = 0
+    won = False
 
     while not game.is_game_over(board):
 
@@ -41,7 +42,12 @@ def play_game(genome):
 
             game.add_new_tile(board)
 
-    return board, score
+            # Verifica se venceu (atingiu win_target)
+            max_tile = max(max(row) for row in board)
+            if max_tile >= win_target and not won:
+                won = True
+
+    return board, score, won
 
 
 def main():
@@ -52,14 +58,17 @@ def main():
     print(genome)
 
     games = 50
+    win_target = 1024
 
     scores = []
     max_tiles = []
+    wins = 0
 
     for i in range(games):
 
-        board, score = play_game(
-            genome
+        board, score, won = play_game(
+            genome,
+            win_target
         )
 
         scores.append(score)
@@ -70,6 +79,9 @@ def main():
         )
 
         max_tiles.append(max_tile)
+
+        if won:
+            wins += 1
 
     print("\n==============================")
     print("TEST")
@@ -90,6 +102,11 @@ def main():
     print(
         f"Best tile: "
         f"{max(max_tiles)}"
+    )
+
+    print(
+        f"Wins (target {win_target}): {wins}/{games} "
+        f"({wins/games*100:.1f}%)"
     )
 
 

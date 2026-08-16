@@ -290,17 +290,19 @@ def choose_move(board, genome):
 # FITNESS
 # ============================================================
 
-def play_game(genome):
+def play_game(genome, win_target=1024):
     """
     Faz um genome jogar uma partida completa.
 
-    O score final da partida será utilizado
-    como medida de fitness.
+    Retorna:
+        score: score total da partida
+        won: True se atingiu win_target, False caso contrário
     """
 
     board = game.reset_game()
 
     total_score = 0
+    won = False
 
     while not game.is_game_over(board):
 
@@ -323,10 +325,15 @@ def play_game(genome):
 
             game.add_new_tile(board)
 
-    return total_score
+            # Verifica se venceu (atingiu win_target)
+            max_tile = get_max_tile(board)
+            if max_tile >= win_target and not won:
+                won = True
+
+    return total_score, won
 
 
-def fitness(genome, games=10):
+def fitness(genome, games=10, win_target=1024):
     """
     Calcula o fitness médio de um genome.
 
@@ -337,15 +344,25 @@ def fitness(genome, games=10):
     ou muito bom simplesmente por sorte.
 
     Portanto usamos a média.
+
+    A vitória tem muito mais peso que o score:
+    - Vitória: +100000 pontos por partida
+    - Score: valor normal do jogo
     """
 
-    scores = []
+    total_fitness = 0
+    wins = 0
 
     for _ in range(games):
-        score = play_game(genome)
-        scores.append(score)
+        score, won = play_game(genome, win_target)
 
-    return sum(scores) / len(scores)
+        if won:
+            wins += 1
+            total_fitness += 100000  # Bônus enorme por vencer
+
+        total_fitness += score
+
+    return total_fitness / games
 
 
 # ============================================================
@@ -452,7 +469,8 @@ def evolve(
     population_size=30,
     generations=20,
     survivors_count=6,
-    initial_genome=None
+    initial_genome=None,
+    win_target=1024
 ):
     """
     Executa o algoritmo genético completo.
@@ -502,7 +520,8 @@ def evolve(
 
             score = fitness(
                 genome,
-                games=10
+                games=10,
+                win_target=win_target
             )
 
             fitnesses.append(score)
