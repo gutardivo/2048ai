@@ -9,20 +9,20 @@ import game
 
 def create_genome():
     """
-    Cria um indivíduo.
+    Creates an individual.
 
-    O genome contém 4 pesos:
+    The genome contains 4 weights:
 
         [0] empty_cells
         [1] max_tile
         [2] monotonicity
         [3] smoothness
 
-    Esses pesos determinam como o agente avalia
-    um tabuleiro.
+    These weights determine how the agent evaluates
+    a board.
 
-    O algoritmo genético vai tentar encontrar
-    bons valores para esses pesos.
+    The genetic algorithm will try to find
+    good values for these weights.
     """
 
     return [
@@ -39,9 +39,9 @@ def create_genome():
 
 def create_population(size):
     """
-    Cria uma população contendo vários genomes.
+    Creates a population containing multiple genomes.
 
-    Cada genome começa com pesos aleatórios.
+    Each genome starts with random weights.
     """
 
     return [
@@ -56,7 +56,7 @@ def create_population(size):
 
 def count_empty_cells(board):
     """
-    Conta quantas células vazias existem.
+    Counts how many empty cells exist.
     """
 
     return sum(
@@ -68,7 +68,7 @@ def count_empty_cells(board):
 
 def get_max_tile(board):
     """
-    Retorna o maior tile existente.
+    Returns the largest existing tile.
     """
 
     return max(
@@ -79,17 +79,17 @@ def get_max_tile(board):
 
 def calculate_smoothness(board):
     """
-    Mede o quão próximos são os valores dos tiles vizinhos.
+    Measures how close the values of neighboring tiles are.
 
-    Usamos log2 porque:
+    We use log2 because:
 
         2, 4, 8, 16, 32...
 
-    possuem diferenças mais significativas
-    em escala logarítmica.
+    have more significant differences
+    on a logarithmic scale.
 
-    Quanto mais próximos forem os vizinhos,
-    maior será a smoothness.
+    The closer the neighbors are,
+    the higher the smoothness.
     """
 
     smoothness = 0
@@ -104,7 +104,7 @@ def calculate_smoothness(board):
 
             log_value = value.bit_length() - 1
 
-            # Vizinho da direita
+            # Right neighbor
             if j + 1 < 4:
 
                 neighbor = board[i][j + 1]
@@ -116,7 +116,7 @@ def calculate_smoothness(board):
                         log_value - neighbor_log
                     )
 
-            # Vizinho de baixo
+            # Bottom neighbor
             if i + 1 < 4:
 
                 neighbor = board[i + 1][j]
@@ -133,25 +133,25 @@ def calculate_smoothness(board):
 
 def calculate_monotonicity(board):
     """
-    Mede se os valores do tabuleiro seguem uma direção
-    consistente.
+    Measures if the board values follow a consistent
+    direction.
 
-    Exemplo bom:
+    Good example:
 
         128 64 32 16
         64  32 16  8
         32  16 8   4
         16  8  4   2
 
-    A ideia é incentivar o agente a organizar os tiles
-    em uma direção.
+    The idea is to encourage the agent to organize tiles
+    in one direction.
 
-    O resultado pode ser positivo ou negativo.
+    The result can be positive or negative.
     """
 
     totals = [0, 0, 0, 0]
 
-    # Avalia as linhas
+    # Evaluate rows
     for row in board:
 
         for i in range(3):
@@ -171,7 +171,7 @@ def calculate_monotonicity(board):
             elif next_value > current:
                 totals[1] += current_log - next_log
 
-    # Avalia as colunas
+    # Evaluate columns
     for j in range(4):
 
         for i in range(3):
@@ -199,11 +199,11 @@ def calculate_monotonicity(board):
 
 def evaluate_board(board, genome):
     """
-    Calcula o valor de um tabuleiro usando um genome.
+    Calculates the value of a board using a genome.
 
-    O genome contém os pesos.
+    The genome contains the weights.
 
-    Exemplo:
+    Example:
 
         genome = [
             5.0,
@@ -212,16 +212,16 @@ def evaluate_board(board, genome):
             1.0
         ]
 
-    Então:
+    Then:
 
-        avaliação =
+        evaluation =
             5 * empty_cells
           + 2 * max_tile
           + 3 * monotonicity
           + 1 * smoothness
 
-    Quanto maior o resultado,
-    melhor o agente considera o tabuleiro.
+    The higher the result,
+    the better the agent considers the board.
     """
 
     empty_cells = count_empty_cells(board)
@@ -246,16 +246,16 @@ def evaluate_board(board, genome):
 
 def choose_move(board, genome):
     """
-    Usa um genome para escolher o próximo movimento.
+    Uses a genome to choose the next move.
 
-    Para cada movimento possível:
+    For each possible move:
 
-        1. Executa o movimento.
-        2. Olha o novo board.
-        3. Avalia o novo board.
-        4. Escolhe o movimento com maior avaliação.
+        1. Executes the move.
+        2. Looks at the new board.
+        3. Evaluates the new board.
+        4. Chooses the move with the highest evaluation.
 
-    Esse é o "cérebro" do nosso agente.
+    This is the "brain" of our agent.
     """
 
     moves = game.available_moves(board)
@@ -292,19 +292,21 @@ def choose_move(board, genome):
 
 def play_game(genome, win_target=1024):
     """
-    Faz um genome jogar uma partida completa.
+    Makes a genome play a complete game.
 
-    Retorna:
-        score: score total da partida
-        won: True se atingiu win_target, False caso contrário
+    Returns:
+        score: total score of the game
+        won: True if win_target was reached, False otherwise
     """
 
     board = game.reset_game()
 
     total_score = 0
     won = False
+    moves_count = 0
+    max_moves = 5000  # Safety limit
 
-    while not game.is_game_over(board):
+    while not game.is_game_over(board) and moves_count < max_moves:
 
         action = choose_move(
             board,
@@ -323,31 +325,33 @@ def play_game(genome, win_target=1024):
 
             total_score += reward
 
-            game.add_new_tile(board)
+            board = game.add_new_tile(board)
 
-            # Verifica se venceu (atingiu win_target)
+            # Check if won (reached win_target)
             max_tile = get_max_tile(board)
             if max_tile >= win_target and not won:
                 won = True
 
+        moves_count += 1
+
     return total_score, won
 
 
-def fitness(genome, games=10, win_target=1024):
+def fitness(genome, games=3, win_target=1024):
     """
-    Calcula o fitness médio de um genome.
+    Calculates the average fitness of a genome.
 
-    Jogamos várias partidas porque o 2048 possui
-    aleatoriedade.
+    We play multiple games because 2048 has
+    randomness.
 
-    Um único jogo pode dar um resultado muito ruim
-    ou muito bom simplesmente por sorte.
+    A single game can give a very bad result
+    or a very good result simply by luck.
 
-    Portanto usamos a média.
+    Therefore we use the average.
 
-    A vitória tem muito mais peso que o score:
-    - Vitória: +100000 pontos por partida
-    - Score: valor normal do jogo
+    Victory has much more weight than score:
+    - Victory: +100000 points per game
+    - Score: normal game value
     """
 
     total_fitness = 0
@@ -358,7 +362,7 @@ def fitness(genome, games=10, win_target=1024):
 
         if won:
             wins += 1
-            total_fitness += 100000  # Bônus enorme por vencer
+            total_fitness += 100000  # Huge bonus for winning
 
         total_fitness += score
 
@@ -371,18 +375,18 @@ def fitness(genome, games=10, win_target=1024):
 
 def selection(population, fitnesses, survivors):
     """
-    Seleciona os melhores indivíduos.
+    Selects the best individuals.
 
     population:
-        lista de genomes
+        list of genomes
 
     fitnesses:
-        fitness correspondente a cada genome
+        fitness corresponding to each genome
 
     survivors:
-        quantidade de indivíduos que queremos manter
+        number of individuals we want to keep
 
-    Retorna os melhores genomes.
+    Returns the best genomes.
     """
 
     ranked = sorted(
@@ -403,12 +407,12 @@ def selection(population, fitnesses, survivors):
 
 def crossover(genome1, genome2):
     """
-    Cria um filho combinando dois pais.
+    Creates a child by combining two parents.
 
-    Para cada gene:
+    For each gene:
 
-        50% chance de pegar do pai 1
-        50% chance de pegar do pai 2
+        50% chance to get from parent 1
+        50% chance to get from parent 2
     """
 
     child = []
@@ -432,19 +436,19 @@ def crossover(genome1, genome2):
 
 def mutation(genome, mutation_rate=0.1):
     """
-    Faz pequenas alterações aleatórias no genome.
+    Makes small random changes to the genome.
 
-    mutation_rate = chance de cada gene sofrer mutação.
+    mutation_rate = chance of each gene suffering mutation.
 
-    Exemplo:
+    Example:
 
         [5.0, 2.0, 3.0, 1.0]
 
-    pode virar:
+    can become:
 
         [5.0, 2.0, 3.7, 1.0]
 
-    A mutação mantém diversidade na população.
+    Mutation maintains diversity in the population.
     """
 
     mutated = genome[:]
@@ -473,17 +477,17 @@ def evolve(
     win_target=1024
 ):
     """
-    Executa o algoritmo genético completo.
+    Executes the complete genetic algorithm.
 
-    Em cada geração:
+    In each generation:
 
-        1. Calcula fitness de todos.
-        2. Seleciona os melhores.
-        3. Faz crossover.
-        4. Faz mutation.
-        5. Cria uma nova população.
+        1. Calculates fitness of all.
+        2. Selects the best.
+        3. Performs crossover.
+        4. Performs mutation.
+        5. Creates a new population.
 
-    Retorna o melhor genome encontrado.
+    Returns the best genome found.
     """
 
     history = {
@@ -544,7 +548,7 @@ def evolve(
             f"Average: {generation_average:.0f}"
         )
 
-        # Guarda o melhor indivíduo encontrado
+        # Store the best individual found
         best_index = fitnesses.index(
             generation_best
         )
@@ -557,20 +561,20 @@ def evolve(
                 best_index
             ][:]
 
-        # Seleciona os melhores
+        # Select the best
         survivors = selection(
             population,
             fitnesses,
             survivors_count
         )
 
-        # Começamos a nova população
+        # Start the new population
         new_population = [
             genome[:]
             for genome in survivors
         ]
 
-        # Preenche o restante com filhos
+        # Fill the rest with children
         while len(new_population) < population_size:
 
             parent1 = random.choice(

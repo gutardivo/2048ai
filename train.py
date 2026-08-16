@@ -1,7 +1,7 @@
 import json
 import genetic
 import matplotlib.pyplot as plt
-
+import os
 
 def load_genome(filename="models/best_genome.json"):
     with open(filename, "r") as file:
@@ -9,8 +9,8 @@ def load_genome(filename="models/best_genome.json"):
 
 def plot_evolution(history):
     """
-    Mostra como o fitness da população
-    evoluiu ao longo das gerações.
+    Shows how the population fitness
+    evolved over generations.
     """
 
     generations = range(
@@ -59,15 +59,17 @@ def create_population_from_genome(
     return population
 
 def main():
-
-    genome = load_genome()
+    if os.path.exists("models/best_genome.json"):
+        genome = load_genome()
+    else:
+        genome = genetic.create_genome()
 
     win_target = 1024
 
-    # Treina
+    # Train
     best_genome, fitness, history = genetic.evolve(
-        population_size=30,
-        generations=20,
+        population_size=100,
+        generations=50,
         survivors_count=6,
         initial_genome=genome,
         win_target=win_target
@@ -84,7 +86,7 @@ def main():
         f"Best fitness: {fitness:.0f}"
     )
 
-    # Salva o genome
+    # Save the genome
     with open(
         "models/best_genome.json",
         "w"
@@ -96,7 +98,7 @@ def main():
             indent=4
         )
 
-    # Mostra gráfico
+    # Show graph
     plot_evolution(history)
 
 

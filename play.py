@@ -40,9 +40,9 @@ def play_game(genome, win_target=1024):
 
             score += reward
 
-            game.add_new_tile(board)
+            board = game.add_new_tile(board)
 
-            # Verifica se venceu (atingiu win_target)
+            # Check if won (reached win_target)
             max_tile = max(max(row) for row in board)
             if max_tile >= win_target and not won:
                 won = True

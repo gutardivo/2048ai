@@ -7,12 +7,12 @@ import matplotlib.pyplot as plt
 
 def play_game(genome, win_target=1024):
     """
-    Faz o agente jogar uma partida.
+    Makes the agent play a game.
 
-    Retorna:
-        board final
-        score final
-        won: True se atingiu win_target
+    Returns:
+        final board
+        final score
+        won: True if win_target was reached
     """
 
     board = game.reset_game()
@@ -39,9 +39,9 @@ def play_game(genome, win_target=1024):
 
             total_score += reward
 
-            game.add_new_tile(board)
+            board = game.add_new_tile(board)
 
-            # Verifica se venceu (atingiu win_target)
+            # Check if won (reached win_target)
             max_tile = max(max(row) for row in board)
             if max_tile >= win_target and not won:
                 won = True
@@ -54,7 +54,7 @@ def save_genome(
     filename="models/best_genome.json"
 ):
     """
-    Salva o genome em um arquivo JSON.
+    Saves the genome to a JSON file.
     """
 
     with open(filename, "w") as file:
@@ -69,7 +69,7 @@ def load_genome(
     filename="models/best_genome.json"
 ):
     """
-    Carrega um genome salvo.
+    Loads a saved genome.
     """
 
     with open(filename, "r") as file:
@@ -78,7 +78,7 @@ def load_genome(
 
 def train(win_target=1024):
     """
-    Treina o algoritmo genético.
+    Trains the genetic algorithm.
     """
 
     best_genome, best_fitness, history = (
@@ -106,8 +106,8 @@ def train(win_target=1024):
 
 def plot_evolution(history):
     """
-    Plota a evolução do fitness
-    ao longo das gerações.
+    Plots the fitness evolution
+    over generations.
     """
 
     generations = range(
@@ -142,10 +142,10 @@ def plot_evolution(history):
 
 def test_agent(genome, games=50, win_target=1024):
     """
-    Testa o genome em várias partidas.
+    Tests the genome in multiple games.
 
-    O treinamento não é considerado aqui.
-    São partidas novas.
+    Training is not considered here.
+    These are new games.
     """
 
     scores = []
@@ -202,16 +202,16 @@ def test_agent(genome, games=50, win_target=1024):
 
 def main():
 
-    # 1. Treina
+    # 1. Train
     best_genome, history = train()
 
-    # 2. Salva o melhor genome
+    # 2. Save the best genome
     save_genome(best_genome)
 
-    # 3. Mostra a evolução
+    # 3. Show the evolution
     plot_evolution(history)
 
-    # 4. Testa o melhor genome
+    # 4. Test the best genome
     test_agent(
         best_genome,
         games=50

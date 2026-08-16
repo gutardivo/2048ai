@@ -6,13 +6,13 @@ import genetic
 
 def random_agent(board):
     """
-    Agente baseline.
+    Baseline agent.
 
-    Não possui inteligência.
+    Has no intelligence.
 
-    Escolhe aleatoriamente entre os movimentos possíveis.
+    Randomly chooses among possible moves.
 
-    Serve para termos uma referência de desempenho.
+    Serves as a performance reference.
     """
 
     moves = game.available_moves(board)
@@ -25,14 +25,14 @@ def random_agent(board):
 
 def genetic_agent(board, genome):
     """
-    Agente que utiliza um genome para decidir.
+    Agent that uses a genome to make decisions.
 
-    O genome contém os pesos que determinam
-    como o agente avalia um board.
+    The genome contains the weights that determine
+    how the agent evaluates a board.
 
-    O agente testa todos os movimentos possíveis
-    e escolhe aquele que produz o melhor board
-    segundo o genome.
+    The agent tests all possible moves
+    and chooses the one that produces the best board
+    according to the genome.
     """
 
     return genetic.choose_move(
