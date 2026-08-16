@@ -326,7 +326,7 @@ def play_game(genome):
     return total_score
 
 
-def fitness(genome, games=3):
+def fitness(genome, games=10):
     """
     Calcula o fitness médio de um genome.
 
@@ -342,9 +342,7 @@ def fitness(genome, games=3):
     scores = []
 
     for _ in range(games):
-
         score = play_game(genome)
-
         scores.append(score)
 
     return sum(scores) / len(scores)
@@ -454,6 +452,7 @@ def evolve(
     population_size=30,
     generations=20,
     survivors_count=6,
+    initial_genome=None
 ):
     """
     Executa o algoritmo genético completo.
@@ -469,9 +468,24 @@ def evolve(
     Retorna o melhor genome encontrado.
     """
 
-    population = create_population(
-        population_size
-    )
+    history = {
+        "best": [],
+        "average": []
+    }
+
+    if initial_genome:
+        print("Using initial genome:", initial_genome)
+        population = [
+            mutation(
+                initial_genome,
+                mutation_rate=0.5
+            )
+            for _ in range(population_size)
+        ]
+    else:
+        population = create_population(
+            population_size
+        )
 
     best_genome = None
     best_fitness = float("-inf")
@@ -488,7 +502,7 @@ def evolve(
 
             score = fitness(
                 genome,
-                games=3
+                games=10
             )
 
             fitnesses.append(score)
@@ -499,6 +513,9 @@ def evolve(
             sum(fitnesses)
             / len(fitnesses)
         )
+
+        history["best"].append(generation_best)
+        history["average"].append(generation_average)
 
         print(
             f"Best: {generation_best:.0f}"
@@ -556,4 +573,4 @@ def evolve(
 
         population = new_population
 
-    return best_genome, best_fitness
+    return best_genome, best_fitness, history
