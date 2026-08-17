@@ -3,26 +3,21 @@ import json
 import agent
 import game
 
-
 def load_genome():
-
     with open(
         "models/best_genome.json",
         "r"
     ) as file:
-
         return json.load(file)
 
 
 def play_game(genome, win_target=1024):
-
     board = game.reset_game()
 
     score = 0
     won = False
 
     while not game.is_game_over(board):
-
         action = agent.genetic_agent(
             board,
             genome
@@ -37,7 +32,6 @@ def play_game(genome, win_target=1024):
         )
 
         if moved:
-
             score += reward
 
             board = game.add_new_tile(board)
@@ -49,15 +43,13 @@ def play_game(genome, win_target=1024):
 
     return board, score, won
 
-
 def main():
-
     genome = load_genome()
 
     print("Loaded genome:")
     print(genome)
 
-    games = 50
+    games = 500
     win_target = 1024
 
     scores = []
